@@ -1,0 +1,118 @@
+---
+title: "Wrangle"
+author: "Zahid Asghar"
+date: "5/20/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Wrangle
+
+```{r}
+library(tidyverse)
+as_tibble(iris) # coerce a data frame to tibble
+tibble(x=1:5,   # new tibble from individual vectors
+       y=1,
+       z=x^2+y
+       )
+```
+
+### Special name and tribble
+
+```{r}
+tb<-tibble(
+  `:)`="Smile",
+  ` `="space",
+  `2000`="number"
+)
+
+tb
+```
+
+## Tibbles Versus data.frame
+
+```{r}
+tibble(
+  a=lubridate::now()+runif(1e3)*86400,
+  b=lubridate::today()+runif(1e3)*30,
+  c=1:1e3,
+  d=runif(1e3),
+  e=sample(letters,1e3,replace = TRUE)
+)
+
+
+```
+
+```{r}
+nycflights13::flights %>% ## To print large data sets' part, Inf display all columns
+  print(n=10,width=Inf)
+# this next one is useful after long change of manipulations
+nycflights13::flights %>% 
+  View()
+```
+
+
+## Subsetting
+
+```{r}
+df<-tibble(
+  x=runif(5),
+  y=rnorm(5)
+)
+df$x
+df[["x"]]
+df[[1]]
+df %>% .$x
+```
+
+## Exercises Ch7 Page 123
+
+```{r}
+mtcars  #prints all data
+as_tibble(mtcars) # tibble prints first 10 rows
+is_tibble(mtcars) # tells whether data are tibble or not
+```
+
+
+
+```{r}
+df<-data.frame(abc=1,xyz="a")
+df$x
+df[,"xyz"]
+df[,c("abc","xyz")]
+
+tbl<-as_tibble(df)
+tbl$x
+tbl[,"xyz"]
+tbl[,c("abc","xyz")]
+```
+
+```{r}
+var<-"mpg"
+df[[var]]
+```
+
+```{r}
+annoying<-tibble(
+  `1`=1:10,
+  `2`=`1`*2+rnorm(length(`1`))
+)
+# extract var 1
+annoying[["1"]]
+annoying$`1`
+# Plotting 1 and against 2
+ggplot(annoying)+geom_point(mapping = aes(x=`1`,y=`2`))
+# To add column 3 which is 2 divided by 1
+mutate(annoying,`3`=`2`/`1`)
+annoying<-mutate(annoying,`3`=`2`/`1`)
+#rename
+annoying<-rename(annoying,one=`1`,two=`2`,three=`3`)
+```
+
+
+
+
+

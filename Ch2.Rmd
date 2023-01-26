@@ -1,0 +1,277 @@
+---
+title: "R4DS ch2"
+author: "Zahid Asghar"
+date: "5/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(tidyverse)
+#tidyverse_update() # Update tidyverse packages
+#install.packages(c("nycflights13","gapminder","Lahman"))
+```
+
+## To include data in a question on stackflows 
+```{r}
+dput(mtcars)
+#copy the output and paste
+
+#mtcars<-#paste
+```
+
+## Creating a plot
+
+```{r}
+ggplot(data=mpg)+geom_point(mapping = aes(x=displ,y=hwy))
+## Reusable template
+#ggplot(data=<DATA>)+
+#  <GEOM_FUNCTION>(mapping=aes(<MAPPINGS>))
+
+```
+
+## Exercises
+
+```{r}
+#1
+ggplot(data=mpg)
+glimpse(mtcars)
+?mpg # what `drv` variable
+ggplot(mpg)+geom_point(mapping = aes(x=cyl,y=hwy))
+
+ggplot(mpg)+geom_point(mapping = aes(x=drv,y=class)) # why not useful?
+
+```
+
+## Aesthetic mapping
+
+```{r}
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy,colour=class))
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy,size=class))
+```
+
+```{r}
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy,alpha=class))
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy,shape=class))
+
+```
+
+```{r}
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy),colour='blue')
+
+
+```
+
+## Exercise  P#12
+
+```{r}
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy,
+                                     color='blue')) # Why no blue, it should be after parenthesis as in above chart
+glimpse(mpg) ## Which variables are categorical
+
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy,color=displ)) ##3
+
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy,size=displ)) ##3
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy,shape=displ)) ##3
+## 4 and 5 ??
+ggplot(mpg)+geom_point(mapping = aes(x=displ, y=hwy,color=displ<5)) ##6
+
+
+```
+
+## Facets
+
+```{r}
+ggplot(data=mpg)+geom_point(mapping=aes(x=displ,y=hwy))+
+  facet_wrap(~class, nrow=2)
+
+```
+
+### Facet_grid
+
+```{r}
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x=displ,y=hwy))+
+  facet_grid(drv~cyl)
+
+```
+### Excercises p#15
+
+```{r}
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x=displ,y=hwy))+
+  facet_wrap(~drv)
+##2
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x=displ,y=hwy))+
+  facet_grid(drv~cyl)
+
+```
+
+## Geometric objects
+
+```{r}
+ggplot(data=mpg)+geom_point(mapping = aes(x=displ,y=hwy))
+ggplot(data=mpg)+geom_smooth(mapping = aes(x=displ,y=hwy))
+```
+
+```{r}
+ggplot(data=mpg)+geom_smooth(mapping = aes(x=displ,y=hwy, linetype=drv))
+
+```
+```{r}
+ggplot(data=mpg)+geom_smooth(mapping = aes(x=displ,y=hwy))
+
+ggplot(data=mpg)+geom_smooth(mapping = aes(x=displ,y=hwy, grpup=drv))
+ggplot(data=mpg)+geom_smooth(mapping = aes(x=displ,y=hwy,color=drv,show.legend=FALSE))
+
+```
+
+```{r}
+ggplot(data=mpg,mapping = aes(x=displ,y=hwy))+
+  geom_point()+geom_smooth()
+
+ggplot(data=mpg,mapping = aes(x=displ,y=hwy))+
+  geom_point(mapping = aes(color=class))+geom_smooth()
+
+```
+```{r}
+ggplot(data = mpg,mapping = aes(x=displ,y=hwy))+
+  geom_point(mapping = aes(color=class))+
+  geom_smooth(data = filter(mpg,class=="subcompact"),
+              se=FALSE)
+
+```
+
+## Excercises P#21
+
+```{r}
+ggplot(data = mpg,mapping = aes(x=displ,y=hwy,color=drv))+
+  geom_point()+
+  geom_smooth(se=FALSE)
+
+ggplot(data = mpg,mapping = aes(x=displ,y=hwy,color=drv, show.legend=FALSE))+
+  geom_point()+
+  geom_smooth(se=FALSE)
+
+```
+
+```{r}
+
+ggplot(data = mpg,mapping = aes(x=displ,y=hwy))+
+  geom_point()+
+  geom_smooth()
+
+ggplot()+geom_point(data = mpg,mapping = aes(x=displ,y=hwy))+
+  geom_smooth(data = mpg, mapping = aes(x=displ, y=hwy))
+
+```
+
+```{r}
+#Ex6 P#21
+
+ggplot(data = mpg,mapping = aes(x=displ,y=hwy))+
+  geom_point()+
+  geom_smooth(se=FALSE)
+
+
+ggplot(data = mpg,mapping = aes(x=displ,y=hwy, linetype=drv))+
+  geom_point()+
+  geom_smooth(se=FALSE)
+
+
+ggplot()+geom_point(mpg,mapping = aes(x=displ,y=hwy, color=drv))+
+  geom_smooth(mpg,mapping = aes(x=displ,y=hwy
+                                ),se=FALSE)
+
+```
+
+
+## Statistical Transformations
+
+```{r}
+ggplot(data = diamonds)+
+  geom_bar(mapping = aes(x=cut))
+```
+```{r}
+ggplot(data = diamonds)+
+  stat_count(mapping = aes(x=cut))
+
+
+```
+
+
+```{r}
+demo<- tribble(~a,~b,"bar_1",20, 
+               "bar_2",30,
+               "bar_3",40)
+ggplot(data=demo)+
+  geom_bar(mapping = aes(x=a,y=b),stat="identity")
+```
+
+```{r}
+ggplot(data=diamonds)+
+  geom_bar(mapping = aes(x=cut,y=..prop..,group=1))
+
+
+```
+### Stat_summary
+
+```{r}
+ggplot(data=diamonds)+
+  stat_summary(mapping = 
+                 aes(x=cut,y=depth),
+               fun.ymin = min,
+               fun.ymax = max,
+               fun.y = median)
+
+```
+## Exercise
+
+```{r}
+ggplot(data = diamonds)+
+  geom_col(mapping = aes(x=cut))
+
+ggplot(data=diamonds)+
+  geom_bar(mapping = aes(x=cut,y=..prop..)) #Ex5
+
+```
+
+## Position Adjustements
+
+```{r}
+ggplot(data=diamonds)+
+  geom_bar(mapping = aes(x=cut,color=cut))
+ggplot(data=diamonds)+
+  geom_bar(mapping = aes(x=cut,fill=cut))
+## Combination of cut and clarity
+ggplot(data=diamonds)+
+  geom_bar(mapping = aes(x=cut,fill=clarity))
+
+
+```
+
+
+```{r}
+## Alpha for transparency and fill=NA for complete transparency
+ggplot(data = diamonds, mapping=aes(x=cut,fill=clarity))+
+  geom_bar(alpha=1/5, position="identity")
+##NA
+ggplot(data = diamonds, mapping=aes(x=cut,color=clarity))+
+  geom_bar(fill=NA, position="identity")
+
+
+```
+
+```{r}
+ggplot(data = diamonds, mapping=aes(x=cut,fill=clarity))+
+  geom_bar(position = "dodge")
+
+
+```
+

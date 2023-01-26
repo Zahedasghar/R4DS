@@ -1,0 +1,74 @@
+---
+title: "Ch10_Relational_data"
+author: "Zahid Asghar"
+date: "6/3/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Familiar verbs
+
+`Mutating joints` 
+`Filtering joints` 
+`Set Operations` 
+
+### nyclifht
+
+```{r}
+library(tidyverse)
+library(openintro)
+library(nycflights13)
+
+```
+
+```{r}
+airlines
+planes
+weather
+```
+
+## Exercises
+
+
+## Keys
+
+```{r}
+planes %>% 
+  count(tailnum) %>% 
+  filter(n>1)
+weather %>% count(year, month, day, hour, origin) %>% 
+  filter(n>1)
+
+```
+
+```{r}
+flights %>% 
+  count(year,month, day, flight) %>% 
+  filter(n>1)
+flights %>% 
+  count(year,month, day,tailnum) %>% 
+  filter(n>1)
+
+```
+
+## Exercises
+
+```{r}
+Lahman::Batting
+nasaweather:: atoms
+fueleconomy::vehicles
+ggplot2::diamonds
+```
+
+## Mutating Joins
+
+```{r}
+
+```
+
+

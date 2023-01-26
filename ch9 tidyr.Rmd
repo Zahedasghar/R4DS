@@ -1,0 +1,403 @@
+---
+title: "ch9 tidyr"
+author: "Zahid Asghar"
+date: "5/27/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## Tidyr
+
+> Happy families are all alike, every unhappy family is unhappy in its own way.
+-Leo Tolstoy
+
+> Tidy datasets are all alike, but every messy dataset is messy in its own way.
+-Hadley Wickham
+
+
+```{r}
+
+library(tidyverse)
+
+```
+
+```{r}
+table2
+t2_cases<-filter(table2, type=="cases") %>% 
+  rename(cases=count) %>% 
+  arrange(country, cases)
+t2_population<-filter(table2, type=="population") %>% 
+  rename(population=count) %>% 
+  arrange(country, population)
+
+```
+
+
+
+```{r}
+t2_cases_per_cap<-tibble(
+  year=t2_cases$year,
+  country=t2_cases$country,
+  cases=t2_cases$cases,
+  population=t2_population$population
+) %>% 
+  mutate(cases_per_cap=(cases/population)*1000) %>% 
+  select(country,year, cases_per_cap)
+t2_cases_per_cap
+  
+
+```
+
+```{r}
+t2_cases_per_cap <- t2_cases_per_cap %>%
+  mutate(type = "cases_per_cap") %>%
+  rename(count = cases_per_cap)
+
+```
+
+
+```{r}
+
+bind_rows(table2, t2_cases_per_cap) %>%
+  arrange(country, year, type, count)
+
+```
+
+```{r}
+table2 %>% 
+  filter(type=="cases") %>% 
+  ggplot(aes(year,count))+
+  geom_line(aes(group=country),color="grey50")+
+  geom_point(aes(color=country))+
+  scale_x_continuous(breaks = unique(table2$year))+
+  ylab("cases")
+
+```
+
+
+## Gathering
+
+```{r}
+table4a
+
+```
+
+```{r}
+table4a %>% 
+  gather(`1999`,`2000`,key="year",value = "cases")
+
+```
+
+
+```{r}
+table4b %>% 
+  gather(`1999`,`2000`,key="year", value = "population")
+
+
+
+tidy4a <- table4a %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+tidy4b <- table4b %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "population")
+```
+
+
+
+```{r}
+stocks<-tibble(
+  year=c(2015,2015,2016,2016),
+  half=c(1,2,1,2),
+  return=c(1.88,0.59,0.92,0.17)
+)
+
+stocks %>% 
+  pivot_wider(names_from=year,values_from=return) %>% 
+  pivot_longer(`2015`:`2016`,names_to = "year", values_to = "return")
+```
+
+```{r}
+#preg_tidy <- preg %>%
+ # pivot_longer(c(male, female), names_to = "sex", values_to = "count")
+#preg_tidy
+```
+
+
+
+## Separating and Pull
+
+```{r}
+table3
+
+```
+
+```{r}
+table3 %>% 
+  separate(rate, into=c("cases","population"))
+
+## Or
+table3 %>% 
+  separate(rate, into=c("cases","population"),sep = "/")
+
+## Or
+table3 %>% 
+  separate(rate, into=c("cases","population"),convert = TRUE)
+
+
+```
+
+```{r}
+### One can use last two digits of a year
+
+table3 %>% 
+  separate(year,into=c("century","year"),sep=2)
+```
+
+
+## Unite
+
+```{r}
+
+table5 %>% unite(new, century,year)
+
+table5 %>% unite(new, century, year, sep="")
+```
+
+## Exercises
+
+```{r}
+tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")) %>%
+  separate(x, c("one", "two", "three"))
+
+
+tibble(x = c("a,b,c", "d,e", "f,g,i")) %>%
+  separate(x, c("one", "two", "three"))
+
+```
+
+```{r}
+## Extra drops values without warning while separate drops with warning
+tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")) %>%
+  separate(x, c("one", "two", "three"), extra = "drop")
+#`extra` to drop if more values and `fill` if less
+```
+```{r}
+# example with separators
+tibble(x = c("X_1", "X_2", "AA_1", "AA_2")) %>%
+  separate(x, c("variable", "into"), sep = "_")
+
+```
+
+```{r}
+# example with position
+tibble(x = c("X1", "X2", "Y1", "Y2")) %>%
+  separate(x, c("variable", "into"), sep = c(1))
+
+```
+
+```{r}
+# example with separators
+tibble(x = c("X_1", "X_2", "AA_1", "AA_2")) %>%
+  extract(x, c("variable", "id"), regex = "([A-Z])_([0-9])")
+
+```
+
+```{r}
+# example with position
+tibble(x = c("X1", "X2", "Y1", "Y2")) %>%
+  extract(x, c("variable", "id"), regex = "([A-Z])([0-9])")
+
+```
+
+
+Both `separate()` and `extract()` convert a single column to many columns. However, `unite()` converts many columns to one, with a choice of a separator to include between column values.
+
+```{r}
+tibble(variable = c("X", "X", "Y", "Y"), id = c(1, 2, 1, 2)) %>%
+  unite(x, variable, id, sep = "_")
+```
+
+
+## Missing Values
+
+```{r}
+stocks<-tibble(
+  year=c(2015,2015,2015,2015,2016,2016,2016),
+  qtr=c(1,2,3,4,2,3,4),
+  return=c(1.88,0.59,0.35,NA,0.92,0.17,2.66)
+)
+stocks %>% spread(year,return)
+```
+
+```{r}
+stocks %>% 
+  spread(year, return) %>% 
+  gather(year, return, `2015`:`2016`,na.rm=TRUE)
+## Another import tool is using `complete()`
+stocks %>% 
+  complete(year, qtr)
+```
+
+```{r}
+treatment<-tribble(~person, ~treatment,~response,
+                   "Derrick Whitmore",1,7,NA,2,10,NA,
+                   3,9,"Katherine Burke",1,4)
+
+treatment %>% 
+  fill(person)
+```
+
+## Exercises
+
+```{r}
+stocks <- tibble(
+  year   = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
+  qtr    = c(   1,    2,    3,    4,    2,    3,    4),
+  return = c(1.88, 0.59, 0.35,   NA, 0.92, 0.17, 2.66)
+)
+stocks %>% 
+  pivot_wider(names_from = year, values_from = return,
+              values_fill = 0)
+```
+
+```{r}
+stocks <- tibble(
+  year   = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
+  qtr    = c(   1,    2,    3,    4,    2,    3,    4),
+  return = c(1.88, 0.59, 0.35,   NA, 0.92, 0.17, 2.66)
+)
+stocks %>% 
+  pivot_wider(names_from = year, values_from = return,
+              values_fill = 0)
+
+```
+```{r}
+
+stocks %>% 
+ complete(year, qtr, fill=list(return=0))
+
+```
+
+
+
+
+## Case Study
+
+```{r}
+who
+who1<-who %>% 
+  gather(new_sp_m014:newrel_f65,key="key",
+         value = "cases",
+         na.rm = TRUE)
+who1
+```
+
+#### Get some hint by counting key
+
+```{r}
+who1 %>% 
+  count(key)
+
+```
+
+
+```{r}
+who2<-who1 %>% 
+  mutate(key=stringr::str_replace(key, "newrel","new_rel"))
+
+#who2
+who3<-who2 %>% 
+  separate(key, c("new","type","sexage"),sep="_")
+who3
+who3 %>% 
+  count(new)
+```
+```{r}
+who4<-who3 %>% 
+  select(-new,-iso2,-iso3)
+
+## Next we'll separate sex and age
+who5<-who4 %>% 
+  separate(sexage,c("sex","age"),sep=1)
+who5
+## The whole data is now tidy
+```
+
+## Complex pipe
+Instead of doing steps carried above, one will do as follows
+
+```{r}
+who %>% 
+  gather(code,value, new_sp_m014:newrel_f65,na.rm = TRUE) %>% 
+  mutate(
+    code=stringr::str_replace(code,"newrel", "new_rel")
+  ) %>% 
+  separate(code, c("new","var", "sexage")) %>% 
+  select(-new, -iso2, -iso3) %>% 
+  separate(sexage, c("sex","age"),sep=1)
+
+```
+
+## Exercises Page#168
+
+```{r}
+who1 %>% 
+  filter(cases==0) %>% 
+  nrow()
+
+```
+
+
+```{r}
+pivot_longer(who, c(new_sp_m014:newrel_f65), names_to = "key", values_to = "cases") %>%
+  group_by(country, year) %>%
+  mutate(prop_missing = sum(is.na(cases)) / n()) %>%
+  filter(prop_missing > 0, prop_missing < 1)
+
+```
+
+
+```{r}
+nrow(who)
+
+
+who %>% 
+  complete(country, year) %>%
+  nrow()
+
+```
+What happens if mutate(....) step is missed
+
+```{r}
+who3a <- who1 %>%
+  separate(key, c("new", "type", "sexage"), sep = "_")
+
+filter(who3a, new == "newrel") %>% head()
+
+```
+
+#### Ex4
+
+```{r}
+who5 %>%
+  group_by(country, year, sex) %>%
+  filter(year > 1995) %>%
+  summarise(cases = sum(cases)) %>%
+  unite(country_sex, country, sex, remove = FALSE) %>%
+  ggplot(aes(x = year, y = cases, group = country_sex, colour = sex)) +
+  geom_line()
+#> `summarise()` regrouping output by 'country', 'year' (override with `.groups` argument)
+
+```
+
+
+
+
+
+
+
+
